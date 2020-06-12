@@ -239,6 +239,12 @@ public:
 			if (!new_schema_loaded) // if no new schema loaded, no need to try again
 				break;
 		} while (1);
+
+		for (const auto &file : files_)
+			if (file.second.unresolved.size() != 0)
+				throw std::invalid_argument("after all files have been parsed, '" +
+				                            (file.first == "" ? "<root>" : file.first) +
+				                            "' has still undefined references.");
 	}
 
 	void validate(const json::json_pointer &ptr, const json &instance, json_patch &patch, error_handler &e) const final
@@ -1245,7 +1251,7 @@ json json_validator::validate(const json &instance) const
 json json_validator::validate(const json &instance, error_handler &err) const
 {
 	json::json_pointer ptr;
-	json_patch patch{};
+	json_patch patch;
 	root_->validate(ptr, instance, patch, err);
 	return patch;
 }
